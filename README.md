@@ -5,7 +5,7 @@ Source code for "PointTriNet: Learned Triangulation of 3D Point Sets", by Nichol
 
 ## Dependencies
 
-Depends on `pytorch`, `torch-scatter`, and `polyscope`. The code is pretty standard, and there shouldn't any particularly strict version requirements on these depednencies; any recent version should work fine. 
+Depends on `pytorch`, `torch-scatter`, and `polyscope`, along with some other standard numerical components. The code is pretty standard, and there shouldn't any particularly strict version requirements on these depednencies; any recent version should work fine. 
 
 For reproducibilty, a `requirements.txt` is included, which can be used to construct a suitable conda environment like
 ```sh
@@ -23,16 +23,7 @@ The script `main_generate_mesh.py` applies a trained model to triangulate a poin
 python src/main_generate_mesh.py path/to/points.ply  --weights=saved_model/
 ```
 
-This script has the following arguments
-
-| flag | purpose | arguments |
-| :------------- |:------------- | :-----|
-| `--noGUI` | Do not show the GUI, just process options and exit | |
-| `--flipDelaunay` | Flip edges to make the mesh intrinsic Delaunay | |
-| `--refineDelaunay` | Refine and flip edges to make the mesh intrinsic Delaunay and satisfy angle/size bounds | |
-
-This script automatically applies the PointTriNet networks over patches of the shape, allowing it to scale to very large point sets without memory concerns.  The option `--patch-size` adjusts the size of these patches, smaller patches limit memory usage at the cost of a little speed (this is a performance optimization only, results of the method are unaffected).  This simple strategy works great for forward inference, but doesn't help if gradients are needed for a large point set, as PyTorch will retain the whole computation graph regardless---see the training scripts for more advanced patch management.
-
+This checkout the `--help` flag on the script for arguments.
 
 
 ## Example: Integrating with code
@@ -40,8 +31,6 @@ This script automatically applies the PointTriNet networks over patches of the s
 If you want to integrate PointTriNet into your own codebase, the `PointTriNet_Mesher` from `point_tri_net.py` encapsulates all the functionality of the method. It's a `torch.nn.Module`, so you can make it a member of other modules, load weights, etc.
 
 To create the model, load weights, and triangulate a point set, just call:
-
-TODO RUN THIS CODE
 
 ```python
 
@@ -67,4 +56,4 @@ with torch.no_grad():
 
 ## Example: Train the model
 
-First, generate data
+TODO coming soon
