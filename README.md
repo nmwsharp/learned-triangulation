@@ -20,7 +20,7 @@ The script `main_generate_mesh.py` applies a trained model to triangulate a poin
 python src/main_generate_mesh.py path/to/points.ply  --weights=saved_model/
 ```
 
-This checkout the `--help` flag on the script for arguments.
+Check out the `--help` flag on the script for arguments.
 
 
 ## Example: Integrating with code
