@@ -7,10 +7,7 @@ Source code for "PointTriNet: Learned Triangulation of 3D Point Sets", by Nichol
 
 Depends on `pytorch`, `torch-scatter`, and `polyscope`, along with some other standard numerical components. The code is pretty standard, and there shouldn't any particularly strict version requirements on these depednencies; any recent version should work fine. 
 
-For reproducibilty, a `requirements.txt` is included, which can be used to construct a suitable conda environment like
-```sh
-TODO conda stuff
-```
+TODO environments.yml
 
 The codebase should work fine on CPU or cuda, and does not require an special precompiled modules. As usual, you may find the pytorch neural nets to be unacceptably slow on CPU.
 
