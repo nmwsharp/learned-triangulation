@@ -4,6 +4,9 @@ Source code & pretrained model for "[PointTriNet: Learned Triangulation of 3D Po
 - Project: [link](https://nmwsharp.com/research/learned-triangulation/)
 - Talk: [link](https://www.youtube.com/watch?v=PoNT0u_wz4Y)
 
+
+![demo gif](https://github.com/nmwsharp/learned-triangulation/blob/master/teaser.gif)
+
 ## Example: Generate a mesh
 
 
