@@ -1,15 +1,8 @@
-Source code for "PointTriNet: Learned Triangulation of 3D Point Sets", by Nicholas Sharp and Maks Ovsjanikov at ECCV 2020
+Source code & pretrained model for "[PointTriNet: Learned Triangulation of 3D Point Sets](https://nmwsharp.com/research/learned-triangulation/)", by [Nicholas Sharp](https://nmwsharp.com/) and [Maks Ovsjanikov](http://www.lix.polytechnique.fr/~maks/) at ECCV 2020.
 
-**IN PROGRESS** This repository is currently being populated, check back in over the next few days.
-
-
-## Dependencies
-
-Depends on `pytorch`, `torch-scatter`, and `polyscope`, along with some other standard numerical components. The code is pretty standard, and there shouldn't any particularly strict version requirements on these depednencies; any recent version should work fine. 
-
-TODO environments.yml
-
-The codebase should work fine on CPU or cuda, and does not require an special precompiled modules. As usual, you may find the pytorch neural nets to be unacceptably slow on CPU.
+- PDF: [link](https://nmwsharp.com/media/papers/learned-triangulation/learned_triangulation.pdf)
+- Project: [link](https://nmwsharp.com/research/learned-triangulation/)
+- Talk: [link](https://www.youtube.com/watch?v=PoNT0u_wz4Y)
 
 ## Example: Generate a mesh
 
@@ -25,7 +18,7 @@ Check out the `--help` flag on the script for arguments.
 
 ## Example: Integrating with code
 
-If you want to integrate PointTriNet into your own codebase, the `PointTriNet_Mesher` from `point_tri_net.py` encapsulates all the functionality of the method. It's a `torch.nn.Module`, so you can make it a member of other modules, load weights, etc.
+If you want to integrate PointTriNet in to your own codebase, the `PointTriNet_Mesher` from `point_tri_net.py` encapsulates all the functionality of the method. It's a `torch.nn.Module`, so you can make it a member of other modules, load weights, etc.
 
 To create the model, load weights, and triangulate a point set, just call:
 
@@ -51,6 +44,45 @@ with torch.no_grad():
 
 ```
 
-## Example: Train the model
+## Example: Generate data & train the model
 
-TODO coming soon
+**Prerequisite**: a collection of shapes to train on; we use the training set (all classes) of ShapeNet v2, which you can download on your own. Note that we _do not_ train PointTriNet to match the triangulation of existing meshes, we're just using meshes as a convenient data source from which to sample point cloud patches.
+
+**Step 1** Sample point cloud patches as training data
+
+```shell
+python src/generate_local_points_dataset.py --input_dir=/path/to/train_meshes/ --output_dir=data/train/ --n_samples=20000
+
+python src/generate_local_points_dataset.py --input_dir=/path/to/val_meshes/ --output_dir=data/val/ --n_samples=5000
+```
+
+**Step 2** Train the model
+
+```sh
+python src/main_train_model.py
+```
+
+With default parameters, this will train for 3 epochs on the dataset above, using < 8GB gpu memory and taking ~6hrs on an RTX 2070 GPU. Checkpoints will be saved in `./training_runs`, along with tensorboard logging.
+
+Note that this script has paths at the top relative to the expected directory layout of this repo. If you want to use a different directory layout, you can update the paths.
+
+## Dependencies
+
+Depends on `pytorch`, `torch-scatter`, `libigl`, and `polyscope`, along with some other typical numerical components. The code is pretty standard, and there shouldn't be any particularly strict version requirements on these dependencies; any recent version should work fine.
+
+For completeness, an `environment.yml` file is included (which is a superset of the required packages).
+
+## Citation
+
+If this code contributes to academic work, please cite:
+
+```bib
+@inproceedings{sharp2020ptn,
+  title={"PointTriNet: Learned Triangulation of 3D Point Sets"},
+  author={Sharp, Nicholas and Ovsjanikov, Maks},
+  booktitle={Proceedings of the European Conference on Computer Vision (ECCV)},
+  pages={},
+  year={2020}
+}
+```
+
