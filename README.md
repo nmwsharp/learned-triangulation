@@ -13,7 +13,7 @@ The script `main_generate_mesh.py` applies a trained model to triangulate a poin
 python src/main_generate_mesh.py path/to/points.ply  --weights=saved_model/
 ```
 
-Check out the `--help` flag on the script for arguments.
+Check out the `--help` flag on the script for arguments. In particular, the script can either take a point cloud directly as input, or take a mesh as input and uniformly sample points.
 
 
 ## Example: Integrating with code
@@ -48,7 +48,7 @@ with torch.no_grad():
 
 **Prerequisite**: a collection of shapes to train on; we use the training set (all classes) of ShapeNet v2, which you can download on your own. Note that we _do not_ train PointTriNet to match the triangulation of existing meshes, we're just using meshes as a convenient data source from which to sample point cloud patches.
 
-**Step 1** Sample point cloud patches as training data
+**Step 1** Sample point cloud patches as training (and validation) data
 
 ```shell
 python src/generate_local_points_dataset.py --input_dir=/path/to/train_meshes/ --output_dir=data/train/ --n_samples=20000
