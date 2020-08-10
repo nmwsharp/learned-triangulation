@@ -13,7 +13,7 @@ The script `main_generate_mesh.py` applies a trained model to triangulate a poin
 python src/main_generate_mesh.py path/to/points.ply  --weights=saved_model/
 ```
 
-Check out the `--help` flag on the script for arguments. In particular, the script can either take a point cloud directly as input, or take a mesh as input and uniformly sample points.
+Check out the `--help` flag on the script for arguments. In particular, the script can either take a point cloud directly as input, or take a mesh as input and uniformly sample points with `--sample_cloud`.
 
 
 ## Example: Integrating with code
