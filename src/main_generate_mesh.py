@@ -105,7 +105,7 @@ def main():
         print("done predicting")
 
         # Visualize
-        high_prob = 0.9
+        high_prob = args.prob_thresh
         high_faces = candidate_triangles[candidate_probs > high_prob]
         closed_faces = mesh_utils.fill_holes_greedy(high_faces)
 
