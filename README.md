@@ -13,7 +13,7 @@ Source code & pretrained model for "[PointTriNet: Learned Triangulation of 3D Po
 The script `main_generate_mesh.py` applies a trained model to triangulate a point set. A set of pretrained weights are included in `saved_models/`
 
 ```sh
-python src/main_generate_mesh.py saved_model/ path/to/points.ply
+python src/main_generate_mesh.py saved_models/model_state_dict.pth path/to/points.ply
 ```
 
 Check out the `--help` flag on the script for arguments. In particular, the script can either take a point cloud directly as input, or take a mesh as input and uniformly sample points with `--sample_cloud`.
