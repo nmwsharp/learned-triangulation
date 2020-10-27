@@ -8,7 +8,7 @@ import torch
 
 import igl
 import plyfile
-import polyscope
+# import polyscope
 
 import utils
 import mesh_utils
@@ -42,8 +42,7 @@ def main():
     args = parser.parse_args()
     set_args_defaults(args)
 
-    # viz = not args.output
-    viz=True
+    viz = not args.output
     args.polyscope = False
 
     # Initialize polyscope
