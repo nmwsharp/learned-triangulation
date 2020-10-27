@@ -8,7 +8,7 @@ import torch
 
 import igl
 import plyfile
-# import polyscope
+import polyscope
 
 import utils
 import mesh_utils
