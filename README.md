@@ -18,6 +18,11 @@ python src/main_generate_mesh.py saved_models/model_state_dict.pth path/to/point
 
 Check out the `--help` flag on the script for arguments. In particular, the script can either take a point cloud directly as input, or take a mesh as input and uniformly sample points with `--sample_cloud`.
 
+Note that by default, the script opens up a GUI (using [Polyscope](http://polyscope.run/)) to show results. To skip the GUI and just write out the resulting mesh, use:
+
+```sh
+python src/main_generate_mesh.py path_to_your_cloud_or_mesh.ply --output result
+```
 
 ## Example: Integrating with code
 
