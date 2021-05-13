@@ -75,7 +75,7 @@ def main():
         verts, faces = utils.read_mesh(args.input_path)
         print("  {} verts   {} faces".format(verts.shape[0], faces.shape[0]))
         verts = torch.tensor(verts, dtype=args.dtype, device=args.device)
-        faces = torch.tensor(faces, dtype=torch.long, device=args.device)
+        faces = torch.tensor(faces, dtype=torch.int64, device=args.device)
 
         # verts = verts[::10,:]
         
@@ -84,7 +84,11 @@ def main():
         else:
             samples = verts.clone()
 
-
+   
+    # For very large inputs, leave the data on the CPU and only use the device for NN evaluation
+    if samples.shape[0] > 50000:
+        print("Large input: leaving data on CPU")
+        samples = samples.cpu()
                 
     # === Load the model
 

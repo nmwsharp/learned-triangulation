@@ -4,6 +4,7 @@ import os
 import torch
 import torch.nn as nn
 import numpy as np
+import sklearn.neighbors
 
 import mesh_utils
 import utils
@@ -332,6 +333,21 @@ class PointTriNet(torch.nn.Module):
             ) # (B, Q, 3, 3)
 
         barycenters = torch.mean(query_triangles_pos, dim=2)
+                     
+
+        # Manage devices in the case where we are leaving data CPU-side
+        input_device = verts.device
+        model_device = next(self.parameters()).device 
+        query_triangles_pos_d = query_triangles_pos.to(model_device)
+        query_probs_d = query_probs.to(model_device)
+        method = 'brute' if (verts[0].is_cuda and Q < 4096) else 'cpu_kd'
+        if method == 'cpu_kd':
+            # pre-build a tree just once for CPU lookups
+            kd_tree_verts = [sklearn.neighbors.KDTree(utils.toNP(verts[b,...,:3])) for b in range(B)]
+            kd_tree_bary = [sklearn.neighbors.KDTree(utils.toNP(barycenters[b,...])) for b in range(B)]
+        else:
+            kd_tree_verts = [None for b in range(B)]
+            kd_tree_bary = [None for b in range(B)]
 
         # (during training, this should hopefully leave a single chunk, so we get batch statistics
         query_triangle_ind_chunks = torch.split(query_triangle_ind, split_size, dim=1)
@@ -354,7 +370,6 @@ class PointTriNet(torch.nn.Module):
             barycenters_chunk = torch.mean(query_triangle_pos_chunk, dim=2)
 
             # Gather neighborhoods of each candidate face
-            method = 'brute' if (verts[0].is_cuda and Q < 4096) else 'cpu_kd'
 
             # Build out neighbors
             point_neighbor_inds = torch.zeros((B, Q_C, K), device=D, dtype=query_triangle_ind.dtype)
@@ -362,19 +377,31 @@ class PointTriNet(torch.nn.Module):
 
             for b in range(B):
 
-                _, point_neighbor_inds_this = knn.find_knn(barycenters_chunk[b,...], verts[b,...,:3], k=K, method=method)
+                _, point_neighbor_inds_this = knn.find_knn(barycenters_chunk[b,...], verts[b,...,:3], k=K, method=method, prebuilt_tree=kd_tree_verts[b])
                 point_neighbor_inds[b,...] = point_neighbor_inds_this
 
-                _, face_neighbor_inds_this = knn.find_knn(barycenters_chunk[b,...], barycenters[b,...], k=K_T+1, method=method, omit_diagonal=False)
+                _, face_neighbor_inds_this = knn.find_knn(barycenters_chunk[b,...], barycenters[b,...], k=K_T+1, method=method, omit_diagonal=False, prebuilt_tree=kd_tree_bary[b])
                 face_neighbor_inds_this = face_neighbor_inds_this[...,1:] # remove self overlap
                 face_neighbor_inds[b,...] = face_neighbor_inds_this
 
 
             # Invoke the model
+
             output_preds_chunk, gen_tri_chunk, gen_pred_chunk = \
-                self(verts, query_triangles_pos, query_probs, query_triangle_pos_chunk,
-                    query_triangle_ind_chunk, query_triangle_prob_chunk, 
-                    point_neighbor_inds, face_neighbor_inds, new_verts_per_edge)
+                self(verts.to(model_device), 
+                     query_triangles_pos_d,
+                     query_probs_d,
+                     query_triangle_pos_chunk.to(model_device),
+                     query_triangle_ind_chunk.to(model_device), 
+                     query_triangle_prob_chunk.to(model_device), 
+                     point_neighbor_inds.to(model_device), 
+                     face_neighbor_inds.to(model_device), 
+                     new_verts_per_edge)
+
+
+            output_preds_chunk = output_preds_chunk.to(input_device)
+            gen_tri_chunk = gen_tri_chunk.to(input_device)
+            gen_pred_chunk = gen_pred_chunk.to(input_device)
 
             pred_chunks.append(output_preds_chunk)
             gen_tri_chunks.append(gen_tri_chunk)

@@ -285,13 +285,21 @@ def uniqueify_triangle_prob_batch(candidate_triangles, candidate_probs):
     for b in range(B):
 
         # Identify unique triangles
-        _, inverse_inds = torch.unique(candidate_triangles[b], dim=0, return_inverse=True)
+        if candidate_triangles.is_cuda:
+            _, inverse_inds = torch.unique(candidate_triangles[b], dim=0, return_inverse=True)
+        else:
+            # the CPU implementation of torch.unique(inverse_inds=True) has some scaling problems;
+            _, inverse_inds = np.unique(toNP(candidate_triangles[b]).astype(np.int32), axis=0, return_inverse=True)
+            inverse_inds = torch.tensor(inverse_inds, device=candidate_triangles.device, dtype=torch.long)
 
         # find the largest prob and first entry for each repeat group 
         max_probs, max_entry = torch_scatter.scatter_max(candidate_probs[b, :], inverse_inds)
         max_entry = max_entry.detach() # needed due to a torch_scatter bug?
         ind_of_max = max_entry[inverse_inds]
         is_max = torch.arange(inverse_inds.shape[0], device=inverse_inds.device) == ind_of_max
+        del inverse_inds
+        del max_probs
+        del max_entry
 
         # set repeat probs to -1, keeping only the largest prob for repeated triangles
         zeroed_candidate_probs = torch.where(is_max, candidate_probs[b,:], -torch.ones_like(candidate_probs[b,:]))
@@ -317,6 +325,7 @@ def uniqueify_triangle_prob_batch(candidate_triangles, candidate_probs):
     if world.debug_checks:
         for b in range(B):
             utils.check_faces_for_duplicates(candidate_triangles[b,:,:], check_rows=True)
+    
 
     return candidate_triangles, candidate_probs
 

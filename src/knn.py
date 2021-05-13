@@ -12,7 +12,7 @@ import torch_cluster
 
 # Finds the k nearest neighbors of source on target.
 # Return is two tensors (distances, indices). Returned points will be sorted in increasing order of distance.
-def find_knn(points_source, points_target, k, largest=False, omit_diagonal=False, method='brute'):
+def find_knn(points_source, points_target, k, largest=False, omit_diagonal=False, method='brute', prebuilt_tree=None):
 
     if omit_diagonal and points_source.shape[0] != points_target.shape[0]:
         raise ValueError("omit_diagonal can only be used when source and target are same shape")
@@ -44,10 +44,13 @@ def find_knn(points_source, points_target, k, largest=False, omit_diagonal=False
             raise ValueError("can't do largest with cpu_kd")
 
         points_source_np = toNP(points_source)
-        points_target_np = toNP(points_target)
 
         # Build the tree
-        kd_tree = sklearn.neighbors.KDTree(points_target_np)
+        if prebuilt_tree is not None:
+            kd_tree = prebuilt_tree
+        else:
+            points_target_np = toNP(points_target)
+            kd_tree = sklearn.neighbors.KDTree(points_target_np)
 
         k_search = k+1 if omit_diagonal else k 
         _, neighbors = kd_tree.query(points_source_np, k=k_search)
